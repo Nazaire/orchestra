@@ -134,11 +134,11 @@ worker.resolve(result);
 The consumer is an interface that can add work to the network.
 
 ```
-const { Consumer, Network, Workspace } = require('orchestra');
+const { Consumer } = require('orchestra');
 
 const consumer = new Consumer(
-    new Network(),
-    new Workspace('/path/to/workspace'),
+    network,
+    workspace,
 );
 
 const { job, result } = await consumer.addJob('add.js', { a: 1, b: 2 });
