@@ -44,8 +44,8 @@ Or again, if you have multiple servers, you can have the `Composer` exist on a m
 Establish a network of machines.
 Provided options:
 
-- MemNetwork - A network that exists in one process (useful for testing or single machine setups)
-- RedisNetwork - A network that runs across many machines and uses Redis as a message broker
+- `MemNetwork` - A network that exists in one process (useful for testing or single machine setups)
+- `RedisNetwork` - A network that runs across many machines and uses Redis as a message broker
 
 ```
 const { MemNetwork } = require('orchestra');
