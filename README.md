@@ -141,7 +141,7 @@ const consumer = new Consumer(
     workspace,
 );
 
-const { job, result } = await consumer.addJob('add.js', { a: 1, b: 2 });
+const { job, result } = await consumer.addJob({ script: 'add.js', params: { a: 1, b: 2 } });
 
 console.log(`Created job`, { job });
 console.log('Waiting for completion...')
@@ -153,6 +153,7 @@ console.log(`Result:`, await result)
 Orchestra supports fully typed job params and results.
 
 ```
+// define the params and results of each script in a type
 type MyScripts = {
     'add.js': {
        params: {
@@ -168,12 +169,15 @@ const workspace = new Workspace<keyof MyScripts, MyScripts>(
 );
 
 const consumer = new Consumer<typeof Workspace>(
-    new Network(),
+    network,
     workspace,
 );
 
 // this method is now fully typed (the params and the result)
-const {job, result} = await consumer.addJob('add.js', { a: 1, b: 2 }) // { job: Job, result: Promise<number> }
+const { job, result } = await consumer.addJob({
+    script: 'add.js',
+    params: { a: 1, b: 2 } }
+) // { job: Job, result: Promise<number> }
 ```
 
 The Worker class can also be typed.
