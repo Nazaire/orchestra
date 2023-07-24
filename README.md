@@ -31,7 +31,7 @@ Alternatively, if you only need one machine:
 
 - Single machine: Has an instance of `Composer`, `Instrument` and `Consumer`
 
-Or again, if you have multiple servers, you can have the consumer exist on a master worker machine:
+Or again, if you have multiple servers, you can have the `Composer` exist on a master worker machine:
 
 - Server (many): Has an instance of `Consumer`
 - Master worker (only one): Has an instance of `Composer` ( and `Instrument` if you want work to be done on the master worker too)
@@ -76,7 +76,7 @@ const workspace = new Workspace(
 ### Composer
 
 The composer is responsible for managing the queue of work to be done and distributing it to the workers.
-There should only be one composer per network.
+There should only be one `Composer` per network.
 
 ```
 
@@ -92,7 +92,7 @@ network,
 
 ### Instrument
 
-The instrument runs on the main thread of each machine and is responsible for receiving work from the composer and distributing it to it's workers.
+The instrument runs on the main thread of each machine and is responsible for receiving work from the `Composer` and distributing it to it's workers.
 
 ```
 
@@ -112,8 +112,6 @@ workspace,
 ### Worker
 
 This is a helper class that should be used within the worker script to retrieve the params and notify the instrument when the work is complete.
-
-For example:
 
 ```
 
@@ -186,7 +184,7 @@ The Worker class can also be typed.
 const { Worker } = require('orchestra');
 
 // import the workspace instance from somewhere else in your project
-import { workspace } from '...';
+const { workspace }  = require('...');
 
 const worker = new Worker<typeof workspace, 'add.js'>();
 
