@@ -1,0 +1,1 @@
+{"version":3,"file":"Composer.d.ts","sourceRoot":"","sources":["../../src/types/Composer.ts"],"names":[],"mappings":"AACA,OAAO,EACL,OAAO,EAIP,aAAa,EACd,MAAM,oBAAoB,CAAC;AAI5B,qBAAa,QAAS,SAAQ,aAAa;IACzC,SAAgB,EAAE,SAA0B;IAE5C,OAAO,CAAC,KAAK,CAAkB;gBAEnB,OAAO,EAAE,OAAO;YAUd,kBAAkB;YAqBlB,kBAAkB;YAalB,4BAA4B;YAa5B,mBAAmB;YAiBnB,qBAAqB;CAWpC"}
