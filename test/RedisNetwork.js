@@ -22,9 +22,13 @@ describe('Redis Network', () => {
 
         expect(network.connected).to.equal(true)
 
-        composer = new Composer(network)
+        composer = new Composer(network, {
+            debug: true
+        })
 
-        instrument = new Instrument(network, workspace, 1)
+        instrument = new Instrument(network, workspace, 1, {
+            debug: true
+        })
 
         consumer = new Consumer(network, workspace)
     })
@@ -32,8 +36,8 @@ describe('Redis Network', () => {
 
     it('Adds a job', async () => {
         const job = await consumer.addJob({
-            script: 'test.worker.js',
-            params: { test: 123 }
+            script: 'add.worker.js',
+            params: { a: 5, b: 6 }
         });
 
         console.log(`Added a job with id ${job.job.id}`)
@@ -42,8 +46,22 @@ describe('Redis Network', () => {
 
         console.log(`Job ${job.job.id} finished with result ${result}`)
 
-        // result should not be null
-        expect(result).to.not.be.null;
+        expect(result).to.equal(11)
+    })
+
+    it('Adds a job (slow)', async () => {
+        const job = await consumer.addJob({
+            script: 'slowAdd.worker.js',
+            params: { a: 5, b: 6 }
+        });
+
+        console.log(`Added a job with id ${job.job.id}`)
+
+        const result = await job.result;
+
+        console.log(`Job ${job.job.id} finished with result ${result}`)
+
+        expect(result).to.equal(11)
     })
 
 }

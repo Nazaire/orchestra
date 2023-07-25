@@ -33,8 +33,8 @@ describe('Mem Network', () => {
 
     it('Adds a job', async () => {
         const job = await consumer.addJob({
-            script: 'test.worker.js',
-            params: { test: 123 }
+            script: 'add.worker.js',
+            params: { a: 5, b: 6 }
         });
 
         console.log(`Added a job with id ${job.job.id}`)
@@ -43,8 +43,7 @@ describe('Mem Network', () => {
 
         console.log(`Job ${job.job.id} finished with result ${result}`)
 
-        // result should not be null
-        expect(result).to.not.be.null;
+        expect(result).to.equal(11)
     })
 
 }
