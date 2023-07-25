@@ -10,8 +10,8 @@ export class RedisNetwork extends Network {
   constructor(
     private readonly connection: { publisher: Redis; subscriber: Redis },
     private readonly options: {
-      debug: boolean;
-      transformer: {
+      debug?: boolean;
+      transformer?: {
         format: (message: Message) => string;
         parse: (message: string) => Message;
       };
