@@ -21,7 +21,7 @@ export class NetworkClient {
     return {
       source: this.id,
       destination: destination,
-      id: nanoid(),
+      id: "msg_" + nanoid(),
       type,
       data,
       responseTo,

@@ -88,6 +88,9 @@ export class Instrument extends NetworkClient {
 
       this.activeJobs.set(job.id, worker);
 
+      let result: any = null,
+        error: any = null;
+
       const complete = async (result: any, error: string | null) => {
         if (this.activeJobs.get(job.id) !== worker) {
           return;
@@ -121,26 +124,34 @@ export class Instrument extends NetworkClient {
 
       worker.on("message", (message: WorkerMessage<any>) => {
         if (message.type === WorkerMessageType.WORK_RESULT) {
-          complete(message.data.result, message.data.error);
+          // the worker is done as expected
+          result = message.data.result;
           worker.terminate();
         }
       });
 
-      worker.on("error", (error) => {
-        complete(null, [error.message, error.stack].filter(Boolean).join("\n"));
+      worker.on("error", (workError) => {
+        // an error was thrown inside the worker
+        error = workError;
+        worker.terminate();
       });
 
       worker.on("exit", (code) => {
+        // the worker is now dead
+
         if (this.options?.debug) {
           console.log(
             `Instrument: Worker for job ${job.id} exited with code ${code}.`
           );
         }
-        if (code === 0) {
-          complete(null, null);
-        } else {
-          complete(null, String(new Error("Worker exited with code " + code)));
+
+        if (code != 0 && !error) {
+          // the error should be set, but just in case we'll have a fallback error
+          error = String(new Error("Worker exited with code " + code));
         }
+
+        // complete the job
+        complete(result, error);
       });
     } catch (error) {
       console.error(error);

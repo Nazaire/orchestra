@@ -9,8 +9,6 @@ export enum WorkerMessageType {
 
 export type WorkerMessageData = {
   [WorkerMessageType.WORK_RESULT]: {
-    status: "success" | "fail";
     result: any;
-    error: string | null;
   };
 };

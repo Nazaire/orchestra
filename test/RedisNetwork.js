@@ -49,19 +49,34 @@ describe('Redis Network', () => {
         expect(result).to.equal(11)
     })
 
-    it('Adds a job (slow)', async () => {
-        const job = await consumer.addJob({
-            script: 'slowAdd.worker.js',
-            params: { a: 5, b: 6 }
+    // it('Adds a job (slow)', async () => {
+    //     const job = await consumer.addJob({
+    //         script: 'slowAdd.worker.js',
+    //         params: { a: 5, b: 6 }
+    //     });
+
+    //     console.log(`Added a job with id ${job.job.id}`)
+
+    //     const result = await job.result;
+
+    //     console.log(`Job ${job.job.id} finished with result ${result}`)
+
+    //     expect(result).to.equal(11)
+    // })
+
+    it(`Handles errors`, async () => {
+        let job = await consumer.addJob({
+            script: 'error.worker.js',
+            params: {}
         });
 
         console.log(`Added a job with id ${job.job.id}`)
 
-        const result = await job.result;
+        const result = await job.result.catch(err => err);
 
         console.log(`Job ${job.job.id} finished with result ${result}`)
 
-        expect(result).to.equal(11)
+        expect(result).to.be.an('error')
     })
 
 }

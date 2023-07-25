@@ -24,9 +24,7 @@ export class Worker<
     parentPort?.postMessage({
       type: WorkerMessageType.WORK_RESULT,
       data: {
-        status: "success",
         result,
-        error: null,
       },
     } satisfies WorkerMessage<WorkerMessageType.WORK_RESULT>);
 
