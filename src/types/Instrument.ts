@@ -14,7 +14,10 @@ export class Instrument extends NetworkClient {
   constructor(
     network: Network,
     private readonly workspace: Workspace<any, any>,
-    public readonly workers: number
+    public readonly workers: number,
+    private readonly options?: {
+      debug?: boolean;
+    }
   ) {
     super("instrument_" + nanoid(), network);
 
@@ -35,8 +38,6 @@ export class Instrument extends NetworkClient {
       data: null,
     });
 
-    console.log("Sending work request:", workRequest);
-
     const response = await this.sendAndAwaitResponse<MessageType.JOB_RESPONSE>(
       workRequest
     );
@@ -46,13 +47,17 @@ export class Instrument extends NetworkClient {
       return;
     } else {
       // create a worker
+      if (this.options?.debug) {
+        console.log(
+          `Instrument: Processing job ${response.data.id}. Worker count: ${this.activeJobs.size}/${this.workers}`
+        );
+      }
+
       this.startWorker(response.data);
     }
   }
 
   private async startWorker(job: Job) {
-    console.log("Starting worker for job:", job);
-
     const complete = async (result: any, error: string | null) => {
       const message = this.createMessage({
         type: MessageType.JOB_COMPLETED,
@@ -117,7 +122,6 @@ export class Instrument extends NetworkClient {
       });
 
       worker.on("exit", (code) => {
-        console.log("worker exit", { code });
         if (code === 0) {
           complete(null, null);
         } else {
@@ -125,7 +129,7 @@ export class Instrument extends NetworkClient {
         }
       });
     } catch (error) {
-      console.log("error", error);
+      console.error(error);
       complete(null, String(error));
     }
   }
