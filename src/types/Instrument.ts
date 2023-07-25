@@ -47,13 +47,6 @@ export class Instrument extends NetworkClient {
       return;
     } else {
       this.startWorker(response.data);
-
-      // create a worker
-      if (this.options?.debug) {
-        console.log(
-          `Instrument: Started job ${response.data.id}. Worker count: ${this.activeJobs.size}/${this.workers}`
-        );
-      }
     }
   }
 
@@ -76,6 +69,7 @@ export class Instrument extends NetworkClient {
     };
 
     try {
+      // create a worker
       const worker = new Worker(
         this.workspace.getPath(String(job.options.script)),
         {
@@ -84,6 +78,12 @@ export class Instrument extends NetworkClient {
           },
         }
       );
+
+      if (this.options?.debug) {
+        console.log(
+          `Instrument: Started worker for job ${job.id}. Worker count: ${this.activeJobs.size}/${this.workers}`
+        );
+      }
 
       this.activeJobs.set(job.id, worker);
 
@@ -106,6 +106,14 @@ export class Instrument extends NetworkClient {
         await this.send(message);
 
         this.activeJobs.delete(job.id);
+
+        if (this.options?.debug) {
+          console.log(
+            `Instrument: Job ${job.id} completed with result: ${String(
+              result
+            )} and error: ${String(error)}`
+          );
+        }
       };
 
       // node.js worker bindings
@@ -122,6 +130,11 @@ export class Instrument extends NetworkClient {
       });
 
       worker.on("exit", (code) => {
+        if (this.options?.debug) {
+          console.log(
+            `Instrument: Worker for job ${job.id} exited with code ${code}.`
+          );
+        }
         if (code === 0) {
           complete(null, null);
         } else {
