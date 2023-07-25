@@ -11,7 +11,7 @@ A framework for distributing work over many machines, integrated with Node.js wo
 
 Add the npm package to your project:
 
-`npm install @nazaire/orchestra`
+`npm install @nazaire/orchestra --save`
 
 or
 
