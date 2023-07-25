@@ -10,8 +10,6 @@ import { Job } from "./Job/Job.js";
 import { JobQueue } from "./Job/JobQueue.js";
 
 export class Composer extends NetworkClient {
-  public readonly id = "composer_" + nanoid();
-
   private queue = new JobQueue();
 
   constructor(
