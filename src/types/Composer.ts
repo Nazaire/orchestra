@@ -14,7 +14,12 @@ export class Composer extends NetworkClient {
 
   private queue = new JobQueue();
 
-  constructor(network: Network) {
+  constructor(
+    network: Network,
+    private readonly options?: {
+      debug?: boolean;
+    }
+  ) {
     super("composer_" + nanoid(), network);
 
     this.on(MessageType.CREATE_JOB, this.onCreateJobMessage.bind(this));
@@ -47,6 +52,12 @@ export class Composer extends NetworkClient {
 
   private async onCreateJobMessage(msg: StrictMessage<MessageType.CREATE_JOB>) {
     const job = this.queue.createJob(msg.data);
+
+    if (this.options?.debug) {
+      console.log(
+        `Composer: Created job ${job.id}. Waiting jobs: ${this.queue.size}`
+      );
+    }
 
     const response = this.createResponseTo(msg, {
       type: MessageType.CREATE_JOB_RESPONSE,
@@ -96,6 +107,12 @@ export class Composer extends NetworkClient {
       msg.data.result,
       msg.data.error || null
     );
+
+    if (this.options?.debug) {
+      console.log(
+        `Composer: Job ${job.id} completed. Waiting jobs: ${this.queue.size}`
+      );
+    }
 
     this.notifyWorkersIfAvailableWork();
   }

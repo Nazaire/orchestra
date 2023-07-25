@@ -46,14 +46,14 @@ export class Instrument extends NetworkClient {
       // No work available.
       return;
     } else {
+      this.startWorker(response.data);
+
       // create a worker
       if (this.options?.debug) {
         console.log(
-          `Instrument: Processing job ${response.data.id}. Worker count: ${this.activeJobs.size}/${this.workers}`
+          `Instrument: Started job ${response.data.id}. Worker count: ${this.activeJobs.size}/${this.workers}`
         );
       }
-
-      this.startWorker(response.data);
     }
   }
 
