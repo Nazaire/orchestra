@@ -59,6 +59,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nazaire/orchestra@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@nazaire/orchestra@workspace:."
+  dependencies:
+    "@types/node": ^20.4.4
+    chai: ^4.3.7
+    ioredis: ^5.3.2
+    mocha: ^10.2.0
+    nanoid: ^4.0.2
+    rxjs: ^7.8.1
+    ts-node: ^10.9.1
+    typescript: ^5.1.6
+  languageName: unknown
+  linkType: soft
+
 "@npmcli/fs@npm:^3.1.0":
   version: 3.1.0
   resolution: "@npmcli/fs@npm:3.1.0"
@@ -1482,21 +1497,6 @@ __metadata:
   checksum: 87f4164e396f0171b0a3386cc1877a817f572148ee13a7e113b238e48e8a9f2f31d009a92ec38a591ff1567d9662c6b67fd8818a2dbbaed74bc26a87a2a4a9a0
   languageName: node
   linkType: hard
-
-"root-workspace-0b6124@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "root-workspace-0b6124@workspace:."
-  dependencies:
-    "@types/node": ^20.4.4
-    chai: ^4.3.7
-    ioredis: ^5.3.2
-    mocha: ^10.2.0
-    nanoid: ^4.0.2
-    rxjs: ^7.8.1
-    ts-node: ^10.9.1
-    typescript: ^5.1.6
-  languageName: unknown
-  linkType: soft
 
 "rxjs@npm:^7.8.1":
   version: 7.8.1
