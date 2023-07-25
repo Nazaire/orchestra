@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { Network } from "./Network.js";
 import { Message, StrictMessage, MessageData, MessageType } from "./Message.js";
+import { NetworkError } from "./NetworkError.js";
 
 export class NetworkClient {
   constructor(
@@ -57,14 +58,36 @@ export class NetworkClient {
   }
 
   protected async sendAndAwaitResponse<T extends MessageType>(
-    message: Message
+    message: Message,
+    timeout: number
   ): Promise<StrictMessage<T>> {
-    const response = this.network.response(message.id);
+    const responsePromise = this.network.response(message.id);
 
     await this.send(message);
 
-    const data = await response;
+    const response =
+      timeout === Infinity || timeout <= 0
+        ? await responsePromise
+        : await Promise.race([
+            responsePromise,
+            this.timeout(
+              timeout,
+              `Timeout waiting for response from ${message.destination}`
+            ),
+          ]);
 
-    return data as StrictMessage<T>;
+    if (response instanceof NetworkError) {
+      throw response;
+    }
+
+    return response as StrictMessage<T>;
+  }
+
+  private timeout(ms: number, message: string) {
+    return new Promise<NetworkError>((resolve) => {
+      setTimeout(() => {
+        resolve(new NetworkError(message));
+      }, ms);
+    });
   }
 }

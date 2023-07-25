@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { Job, JobOptions, StrictJobOptions } from "./Job/Job.js";
 import { MemNetwork, MessageType, StrictMessage } from "./Network/index.js";
 import { Network } from "./Network/Network.js";
@@ -19,7 +20,7 @@ export interface StrictAddJobResult<
 
 export class Consumer<W extends Workspace<any, any>> extends NetworkClient {
   constructor(network: Network, private readonly workspace: W) {
-    super("consumer_" + Math.random(), network);
+    super("consumer_" + nanoid(), network);
   }
 
   /**
@@ -69,7 +70,10 @@ export class Consumer<W extends Workspace<any, any>> extends NetworkClient {
     });
 
     const response =
-      await this.sendAndAwaitResponse<MessageType.QUERY_JOBS_RESPONSE>(message);
+      await this.sendAndAwaitResponse<MessageType.QUERY_JOBS_RESPONSE>(
+        message,
+        1000
+      );
 
     return response.data;
   }
@@ -77,11 +81,14 @@ export class Consumer<W extends Workspace<any, any>> extends NetworkClient {
   private async createJob(options: JobOptions) {
     const message = this.createMessage({
       type: MessageType.CREATE_JOB,
-      destination: "*",
+      destination: "composer",
       data: options,
     });
     const response =
-      await this.sendAndAwaitResponse<MessageType.CREATE_JOB_RESPONSE>(message);
+      await this.sendAndAwaitResponse<MessageType.CREATE_JOB_RESPONSE>(
+        message,
+        1000
+      );
     return response.data;
   }
 

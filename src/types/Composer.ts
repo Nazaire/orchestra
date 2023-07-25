@@ -20,7 +20,7 @@ export class Composer extends NetworkClient {
       debug?: boolean;
     }
   ) {
-    super("composer_" + nanoid(), network);
+    super("composer", network);
 
     this.on(MessageType.CREATE_JOB, this.onCreateJobMessage.bind(this));
     this.on(MessageType.QUERY_JOBS, this.onQueryJobsMessage.bind(this));
@@ -95,6 +95,11 @@ export class Composer extends NetworkClient {
       type: MessageType.JOB_RESPONSE,
       data: job,
     });
+
+    // todo: is there an edge case if the Instrument reaches it's timeout before this message is received?
+    // todo: we should have a confirmation message from the Instrument that it has received the message
+    // todo: and if it hasn't, we should requeue the job
+    // todo: or we should have a interval check on the Composer side to determine if a Job has stalled or been lost
 
     await this.send(response);
   }

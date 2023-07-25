@@ -39,7 +39,8 @@ export class Instrument extends NetworkClient {
     });
 
     const response = await this.sendAndAwaitResponse<MessageType.JOB_RESPONSE>(
-      workRequest
+      workRequest,
+      1000
     );
 
     if (response.data === null) {
