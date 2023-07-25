@@ -67,6 +67,9 @@ const { MemNetwork } = require('orchestra');
 
 const network = new MemNetwork();
 
+// if you are using a network that requires an async connection
+// you need to also run network.connect() 
+
 // network needs to be passed to all the major components (composer, instrument, consumer)
 
 ```
@@ -214,3 +217,145 @@ const result = params.a + params.b;
 // this method is now fully typed and expects a number
 worker.resolve(result);
 ```
+
+# Examples
+
+## Basic Addition (Typescript) 
+This example uses a worker to perform basic addition.
+The directory structure is as follows:
+```
+- src/
+    - server.ts
+    - worker.ts
+    - orchestra.ts
+    - scripts/
+       - add.ts
+```
+
+### add.ts - the worker script
+This script will be invoked within a Node.JS worker process spawned by the `Instrument`.  
+Note that this is a `.ts` (typescript) file, but is referenced from the consumer at runtime as `add.js`.
+
+```
+// src/scripts/add.ts
+import { Worker } from '@nazaire/orchestra';
+import { workspace } from 'src/orchestra.ts';
+
+// we pass the workspace type as a generic param to the Worker class
+// this will ensure worker.params and worker.resolve are correctly typed
+const worker = new Worker<typeof workspace, 'add.js'>();
+
+worker.resolve(worker.params.a + worker.params.b);
+
+```
+
+### orchestra.ts - shared configuration
+This is a common file in your project shared between the worker and the server, it provides an instance of `Network`, `Workspace` and `Consumer`.
+
+```
+// src/orchestra.ts
+
+import { Consumer, Network, Workspace } from "@nazaire/orchestra";
+import { Redis } from "ioredis";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+export const network = new Network.RedisNetwork(
+  {
+    publisher: new Redis(),
+    subscriber: new Redis(),
+  },
+  {
+    // debug: true,
+  }
+);
+
+// here we specify the types of the available scripts in the workspace
+export type Scripts = {
+  "add.js": {
+    params: { a: number, b: number };
+    result: number;
+  };
+};
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const workspacePath = join(__dirname, "./scripts");
+
+export const workspace = new Workspace<keyof Scripts, Scripts>(workspacePath);
+
+export const consumer = new Consumer(network, workspace);
+```
+
+### server.ts - the server process
+This is the server process. In this example, it's simply setting up the `Composer` and adding a new job to the network every 2 seconds.
+
+```
+// src/server.ts
+
+console.log(`Starting server...`);
+
+await network.connect();
+
+new Composer(network, {
+    // debug: true,
+});
+
+
+console.log("Orchestra ready!");
+
+setInterval(() => {
+    const { job, result } = await consumer.addJob({
+        script: "add.js",
+        params: { a: 1, b: 2},
+    });
+
+    console.log("Added job to queue", job);
+        
+    try {
+        // result is a Promise that will resolve with the result once the job is complete
+        const value = await result;
+        
+        console.log("Job succeeded", value);
+    } catch (error) {
+        console.error("Job failed", error);
+    }
+}, 2_000);
+
+```
+
+### worker.ts - the worker process
+This is the workers entry point. It sets up a `Instrument` that performs work as instructed from the `Composer`.
+
+```
+// src/worker.ts
+import { network, workspace } from 'src/orchestra.js';
+
+console.log(`Starting worker...`);
+
+await network.connect();
+
+console.log("Orchestra ready!");
+
+new Instrument(
+    network,
+    workspace,
+    1, // the number of workers to run on this machine (usually the number of cores available)
+    {
+        debug: true,
+    }
+);
+
+// the Instrument will now spawn workers when it receives work
+```
+
+### Conclusion
+
+Once you've built the source code.
+
+You can start the server with `node dist/server.js`,  
+and you can start a worker process with `node dist/worker.js`.
+
+In this example, there should only ever be ONE process of the server (as the server houses the `Composer` instance)
+and you can spawn as many worker processes as you need.
+
+Adjust the max worker count in the `Instrument` arguments to utilise as many threads as suitable for the machine the process is running on.
