@@ -1,10 +1,21 @@
 # Orchestra
 
-[![https://nodei.co/npm/@nazaire/orchestra.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/@nazaire/orchestra.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/@nazaire/orchestra)
+[![npm version](https://badge.fury.io/js/@nazaire%2Forchestra.svg)](https://badge.fury.io/js/@nazaire%2Forchestra)
+![NPM License](https://img.shields.io/npm/l/@nazaire/orchestra)
 
-![NPM License](https://img.shields.io/npm/l/:packageName)
+> This package is in prerelease and is currently unmaintained and unsupported, use at your own risk.
 
 A framework for distributing work over many machines, integrated with Node.js workers to utilise many threads per machine.
+
+## Installation
+
+Add the npm package to your project:
+
+`npm install @nazaire/orchestra`
+
+or
+
+`yarn add @nazaire/orchestra`
 
 ## Overview / Setup
 
