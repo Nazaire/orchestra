@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import path from 'path';
 import { Composer, Consumer, Instrument, Network, Workspace } from '../dist/index.js';
 
-describe('My First Test', () => {
+describe('Mem Network', () => {
 
     let network, workspace, composer, instrument, consumer;
 

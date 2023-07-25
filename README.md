@@ -1,5 +1,9 @@
 # Orchestra
 
+[![https://nodei.co/npm/@nazaire/orchestra.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/@nazaire/orchestra.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/@nazaire/orchestra)
+
+![NPM License](https://img.shields.io/npm/l/:packageName)
+
 A framework for distributing work over many machines, integrated with Node.js workers to utilise many threads per machine.
 
 ## Overview / Setup

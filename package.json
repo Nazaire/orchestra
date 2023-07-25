@@ -9,12 +9,41 @@
   },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "mocha"
   },
   "devDependencies": {
     "@types/node": "^20.4.4",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "ts-node": "^10.9.1"
-  }
+  },
+  "name": "@nazaire/orchestra",
+  "description": "A framework for distributing work over many machines, integrated with Node.js workers to utilise many threads per machine.",
+  "version": "1.0.0-alpha.1",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "yarn.lock"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nazaire/orchestra.git"
+  },
+  "keywords": [
+    "Node.js",
+    "Worker",
+    "Queue"
+  ],
+  "author": "Nazaire",
+  "license": "ISC",
+  "types": "./dist/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/Nazaire/orchestra/issues"
+  },
+  "homepage": "https://github.com/Nazaire/orchestra#readme"
 }
