@@ -7,6 +7,21 @@
 
 A framework for distributing work over many machines, integrated with Node.js workers to utilise many threads per machine.
 
+```
+import { Client } from 'orchestra';
+
+const orchestra = new Client(
+    network,
+    workspace,
+);
+
+console.log(`Creating job...`);
+
+const result = await orchestra.play({ script: 'add.js', params: { a: 1, b: 2 } });
+
+console.log(`Job complete!`, { result });
+```
+
 ## Installation
 
 Add the npm package to your project:
@@ -63,9 +78,9 @@ Provided options:
 - `RedisNetwork` - A network that runs across many machines and uses Redis as a message broker
 
 ```
-const { MemNetwork } = require('orchestra');
+import { Network } from 'orchestra';
 
-const network = new MemNetwork();
+const network = new Network.MemNetwork();
 
 // if you are using a network that requires an async connection
 // you need to also run network.connect()
@@ -80,7 +95,7 @@ A workspace is a directory that contains the code that will be run on the worker
 All worker machines need to have access to this directory as they will invoke the scripts directly.
 
 ```
-const { Workspace } = require('orchestra');
+import { Workspace } from 'orchestra';
 
 const workspace = new Workspace(
     '/path/to/workspace', // this should be an absolute path, you can use __dirname to get the current directory, or process.cwd() to get the directory the process was started in
@@ -98,7 +113,7 @@ There should only be one `Composer` per network.
 
 ```
 
-const { Composer } = require('orchestra');
+import { Composer } from 'orchestra';
 
 const composer = new Composer(
 network,
@@ -113,8 +128,7 @@ network,
 The instrument runs on the main thread of each machine and is responsible for receiving work from the `Composer` and distributing it to it's workers.
 
 ```
-
-const { Instrument } = require('orchestra');
+import { Instrument } from 'orchestra';
 
 const instrument = new Instrument(
 network,
@@ -133,7 +147,7 @@ This is a helper class that should be used within the worker script to retrieve 
 
 ```
 
-const { Worker } = require('orchestra');
+import { Worker } from 'orchestra';
 
 const worker = new Worker();
 
@@ -152,7 +166,7 @@ worker.resolve(result);
 The Client is an interface that can add work to the network.
 
 ```
-const { Client } = require('orchestra');
+import { Client } from 'orchestra';
 
 const orchestra = new Client(
     network,
@@ -192,7 +206,7 @@ const orchestra = new Client<typeof Workspace>(
 );
 
 // this method is now fully typed (the params and the result)
-const { job, result } = await orchestra.play({
+const result = await orchestra.play({
     script: 'add.js',
     params: { a: 1, b: 2 } }
 ) // Promise<number>
@@ -203,10 +217,10 @@ The Worker class can also be typed.
 ```
 // path/to/workspace/add.js
 
-const { Worker } = require('orchestra');
+import { Worker } from 'orchestra';
 
-// import the workspace instance from somewhere else in your project
-const { workspace }  = require('...');
+// import the workspace type from somewhere else in your project
+import { workspace }  from '...';
 
 const worker = new Worker<typeof workspace, 'add.js'>();
 
@@ -241,6 +255,7 @@ Note that this is a `.ts` (typescript) file, but is referenced from the client a
 
 ```
 // src/scripts/add.ts
+
 import { Worker } from '@nazaire/orchestra';
 import { workspace } from 'src/orchestra.ts';
 
@@ -337,6 +352,7 @@ This is the workers entry point. It sets up a `Instrument` that performs work as
 
 ```
 // src/worker.ts
+
 import { network, workspace } from 'src/orchestra.js';
 
 console.log(`Starting worker...`);
