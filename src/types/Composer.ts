@@ -53,7 +53,7 @@ export class Composer extends NetworkClient {
 
     if (this.options?.debug) {
       console.log(
-        `Composer: Created job ${job.id} at index ${msg.data}. Waiting jobs: ${this.queue.size}`
+        `Composer: Created job ${job.id} at index ${msg.data.index}. Waiting jobs: ${this.queue.size}`
       );
     }
 
