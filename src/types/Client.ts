@@ -28,9 +28,14 @@ export class Client<W extends Workspace<any, any>> extends NetworkClient {
    * @returns the result of the job
    */
   async play<S extends WorkspaceScript<W>>(
-    options: StrictJobOptions<W, S>
+    options: StrictJobOptions<W, S>,
+    onData?: (data: any) => void
   ): Promise<WorkspaceResult<W, S>> {
     const job = await this.createJob(options, 1);
+    if (onData) {
+      const stream = await this.stream(job.id);
+      stream.on("data", onData);
+    }
     return this.getJobResultPromise(job.id);
   }
 
