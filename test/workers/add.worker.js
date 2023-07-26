@@ -6,4 +6,4 @@ const params = worker.params;
 
 console.log("Hello from test worker!", { params })
 
-worker.resolve(params.a + params.b)
+worker.return(params.a + params.b)

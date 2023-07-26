@@ -20,6 +20,13 @@ export class Worker<
     return workerData.params;
   }
 
+  write(data: any) {
+    parentPort?.postMessage({
+      type: WorkerMessageType.WORK_DATA,
+      data,
+    } satisfies WorkerMessage<WorkerMessageType.WORK_DATA>);
+  }
+
   return(result: WorkspaceResult<W, S>) {
     parentPort?.postMessage({
       type: WorkerMessageType.WORK_RESULT,

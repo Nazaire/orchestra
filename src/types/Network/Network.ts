@@ -17,6 +17,14 @@ export abstract class Network {
     return this.channel.subscribe(callback);
   }
 
+  public abstract subscribeData(
+    callback: (message: StrictMessage<MessageType.JOB_DATA>) => void
+  ): Promise<Subscription>;
+
+  public abstract publishData(
+    message: StrictMessage<MessageType.JOB_DATA>
+  ): Promise<void>;
+
   public first = async (
     predicate: (m: Message) => boolean
   ): Promise<Message> => {

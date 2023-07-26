@@ -22,29 +22,34 @@ export interface StrictMessage<K extends MessageType> {
 
 export enum MessageType {
   /**
+   * The instrument is announcing that it is connected to the network.
+   */
+  INSTRUMENT_CONNECTED = 100,
+
+  /**
    * The composer is announcing that it has work available.
    */
-  JOB_AVAILABLE = 100,
+  JOB_AVAILABLE = 101,
 
   /**
    * The instrument is requesting work.
    */
-  JOB_REQUEST = 101,
+  JOB_REQUEST = 102,
 
   /**
    * The composer is allocating a job to an instrument.
    */
-  JOB_RESPONSE = 102,
+  JOB_RESPONSE = 103,
 
   /**
    * The job is complete and the instrument is returning the result.
    */
-  JOB_COMPLETED = 103,
+  JOB_COMPLETED = 104,
 
   /**
-   * The instrument is announcing that it is connected to the network.
+   * A chunk of data from the worker processing a job.
    */
-  INSTRUMENT_CONNECTED = 104,
+  JOB_DATA = 105,
 
   /**
    * Query the jobs available on the composer.
@@ -81,10 +86,9 @@ export type MessageData = {
   [MessageType.QUERY_JOBS_RESPONSE]: Job[];
 
   [MessageType.JOB_AVAILABLE]: null;
-
   [MessageType.JOB_REQUEST]: null;
   [MessageType.JOB_RESPONSE]: Job | null;
-
+  [MessageType.JOB_DATA]: { id: Job["id"]; data: any };
   [MessageType.JOB_COMPLETED]: Job;
 
   [MessageType.INSTRUMENT_CONNECTED]: null;

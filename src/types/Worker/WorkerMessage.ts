@@ -5,10 +5,12 @@ export interface WorkerMessage<T extends WorkerMessageType> {
 
 export enum WorkerMessageType {
   WORK_RESULT = 0,
+  WORK_DATA = 1,
 }
 
 export type WorkerMessageData = {
   [WorkerMessageType.WORK_RESULT]: {
     result: any;
   };
+  [WorkerMessageType.WORK_DATA]: any;
 };

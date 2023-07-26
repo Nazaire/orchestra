@@ -1,22 +1,21 @@
 import { expect } from 'chai';
 import path from 'path';
-import { Composer, Consumer, Instrument, Network, Workspace } from '../dist/index.js';
+import { Composer, Client, Instrument, Network, Workspace } from '../dist/index.js';
 import { Redis } from 'ioredis'
 
 describe('Redis Network', () => {
 
-    let network, workspace, composer, instrument, consumer;
+    let network, workspace, composer, instrument, orchestra;
 
     it('Initialises', async () => {
         workspace = new Workspace(path.resolve(process.cwd(), './test/workers'))
         expect(workspace).to.be.an('object')
 
-        network = new Network.RedisNetwork({
-            publisher: new Redis(),
-            subscriber: new Redis(),
-        }, {
-            debug: true
-        })
+        network = new Network.RedisNetwork(
+            () => new Redis(),
+            {
+                debug: true
+            })
 
         await network.connect();
 
@@ -30,21 +29,21 @@ describe('Redis Network', () => {
             debug: true
         })
 
-        consumer = new Consumer(network, workspace)
+        orchestra = new Client(network, workspace)
     })
 
 
     it('Adds a job', async () => {
-        const job = await consumer.addJob({
+        const job = await orchestra.queue({
             script: 'add.worker.js',
             params: { a: 5, b: 6 }
         });
 
-        console.log(`Added a job with id ${job.job.id}`)
+        console.log(`Added a job with id ${job.id}`)
 
-        const result = await job.result;
+        const result = await orchestra.result(job.id);
 
-        console.log(`Job ${job.job.id} finished with result ${result}`)
+        console.log(`Job ${job.id} finished with result ${result}`)
 
         expect(result).to.equal(11)
     })
@@ -65,18 +64,38 @@ describe('Redis Network', () => {
     // })
 
     it(`Handles errors`, async () => {
-        let job = await consumer.addJob({
+        let job = await orchestra.queue({
             script: 'error.worker.js',
             params: {}
         });
 
-        console.log(`Added a job with id ${job.job.id}`)
+        console.log(`Added a job with id ${job.id}`)
 
-        const result = await job.result.catch(err => err);
+        const result = await orchestra.result(job.id).catch(err => err);
 
-        console.log(`Job ${job.job.id} finished with result ${result}`)
+        console.log(`Job ${job.id} finished with result ${result}`)
 
         expect(result).to.be.an('error')
+    })
+
+    it(`Handles streams`, async () => {
+        let job = await orchestra.queue({
+            script: 'stream.worker.js',
+            params: {}
+        });
+
+        console.log(`Added a job with id ${job.id}`)
+
+        const stream = await orchestra.stream(job.id);
+
+        stream.on('data', (data) => {
+            console.log(`Job ${job.id} stream data: x: ${data.x}, sum: ${data.sum}`)
+        })
+
+        const result = await orchestra.result(job.id);
+
+        console.log(`Job ${job.id} finished with result ${result}`)
+
     })
 
 }

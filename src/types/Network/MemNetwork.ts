@@ -1,9 +1,11 @@
 import { Subject } from "rxjs";
 import { Network } from "./Network.js";
-import { Message, MessageType } from "./Message.js";
+import { Message, MessageType, StrictMessage } from "./Message.js";
 
 export class MemNetwork extends Network {
   channel = new Subject<Message>();
+  private dataChannel = new Subject<StrictMessage<MessageType.JOB_DATA>>();
+
   connected: boolean = true;
 
   constructor(
@@ -31,7 +33,19 @@ export class MemNetwork extends Network {
     return this.channel.next(message);
   }
 
+  public async publishData(
+    message: StrictMessage<MessageType.JOB_DATA>
+  ): Promise<void> {
+    return this.dataChannel.next(message);
+  }
+
   public subscribe(callback: (message: Message) => void) {
     return this.channel.subscribe(callback);
+  }
+
+  public async subscribeData(
+    callback: (message: StrictMessage<MessageType.JOB_DATA>) => void
+  ) {
+    return this.dataChannel.subscribe(callback);
   }
 }

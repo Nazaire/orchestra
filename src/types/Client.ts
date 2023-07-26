@@ -4,6 +4,7 @@ import { MemNetwork, MessageType, StrictMessage } from "./Network/index.js";
 import { Network } from "./Network/Network.js";
 import { NetworkClient } from "./Network/NetworkClient.js";
 import { Workspace, WorkspaceResult, WorkspaceScript } from "./Workspace.js";
+import { Readable, Transform, Writable } from "node:stream";
 
 export class Client<W extends Workspace<any, any>> extends NetworkClient {
   constructor(network: Network, private readonly workspace: W) {
@@ -49,6 +50,31 @@ export class Client<W extends Workspace<any, any>> extends NetworkClient {
     jobId: string
   ): Promise<WorkspaceResult<W, S>> {
     return this.getJobResultPromise(jobId);
+  }
+
+  async stream(jobId: string): Promise<Readable> {
+    const stream = new Transform({
+      objectMode: true,
+      transform: (chunk, encoding, callback) => {
+        callback(null, chunk);
+      },
+    });
+
+    const subscription = await this.network.subscribeData((message) => {
+      if (message.type === MessageType.JOB_DATA && message.data.id === jobId) {
+        stream.write(message.data.data);
+      }
+    });
+
+    stream.on("close", () => {
+      subscription.unsubscribe();
+    });
+
+    this.getJobCompletedPromise(jobId).then(() => {
+      stream.end();
+    });
+
+    return stream;
   }
 
   /**

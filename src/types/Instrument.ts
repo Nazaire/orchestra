@@ -131,11 +131,22 @@ export class Instrument extends NetworkClient {
 
       // node.js worker bindings
 
-      worker.on("message", (message: WorkerMessage<any>) => {
-        if (message.type === WorkerMessageType.WORK_RESULT) {
-          // the worker is done as expected
-          result = message.data.result;
-          worker.terminate();
+      worker.on("message", (message: WorkerMessage<WorkerMessageType>) => {
+        switch (message.type) {
+          case WorkerMessageType.WORK_DATA:
+            this.sendData(
+              this.createMessage({
+                type: MessageType.JOB_DATA,
+                destination: "*",
+                data: {
+                  id: job.id,
+                  data: message.data,
+                },
+              })
+            );
+            break;
+          case WorkerMessageType.WORK_RESULT:
+            result = message.data.result;
         }
       });
 

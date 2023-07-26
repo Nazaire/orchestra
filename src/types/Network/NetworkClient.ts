@@ -41,6 +41,17 @@ export class NetworkClient {
     });
   }
 
+  protected onData(
+    handler: (message: StrictMessage<MessageType.JOB_DATA>) => void
+  ) {
+    return this.network.subscribeData((message) => {
+      if (message.destination !== "*" && message.destination !== this.id)
+        return;
+
+      handler(message);
+    });
+  }
+
   protected createResponseTo<T extends MessageType>(
     responseTo: Message,
     { type, data }: { type: T; data: MessageData[T] }
@@ -55,6 +66,10 @@ export class NetworkClient {
 
   protected async send(message: Message) {
     await this.network.publish(message);
+  }
+
+  protected async sendData(message: StrictMessage<MessageType.JOB_DATA>) {
+    await this.network.publishData(message);
   }
 
   protected async sendAndAwaitResponse<T extends MessageType>(
