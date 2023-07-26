@@ -47,10 +47,7 @@ export class JobQueue {
    * @returns The next job in the queue, or null if there are no jobs.
    */
   public next() {
-    const queue = this.queue.sort((a, b) => {
-      return this.jobs[a].priority - this.jobs[b].priority;
-    });
-    return queue[0];
+    return this.queue[0];
   }
 
   public updateJob(id: string, data: Partial<Job>) {
