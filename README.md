@@ -15,8 +15,22 @@ const orchestra = new Client(
 
 console.log(`Creating job...`);
 
-// Instruct the network to execute add.js and return the result
+// Instruct the network to execute add.js on the next available worker and return the result
 const result = await orchestra.play({ script: 'add.js', params: { a: 1, b: 2 } });
+
+console.log(`Job complete!`, { result });
+
+// Or, If you don't need something processed immediately, you can queue a job instead
+
+console.log(`Creating job...`)
+
+// Add a job to the network and respect the queue
+const job = await orchestra.queue({ script: 'add.js', params: { a: 1, b: 2 });
+
+console.log(`Job ${job.id} added to queue`);
+
+// Get a promise for the result of the job
+const result = await orchestra.result(job.id);
 
 console.log(`Job complete!`, { result });
 ```
