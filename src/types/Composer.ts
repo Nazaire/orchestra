@@ -23,6 +23,10 @@ export class Composer extends NetworkClient {
     this.on(MessageType.CREATE_JOB, this.onCreateJobMessage.bind(this));
     this.on(MessageType.QUERY_JOBS, this.onQueryJobsMessage.bind(this));
 
+    this.on(
+      MessageType.INSTRUMENT_CONNECTED,
+      this.onInstrumentConnected.bind(this)
+    );
     this.on(MessageType.JOB_REQUEST, this.onJobRequestMessage.bind(this));
     this.on(MessageType.JOB_COMPLETED, this.onJobCompletedMessage.bind(this));
   }
@@ -78,6 +82,12 @@ export class Composer extends NetworkClient {
 
       await this.send(message);
     }
+  }
+
+  private async onInstrumentConnected(
+    _msg: StrictMessage<MessageType.INSTRUMENT_CONNECTED>
+  ) {
+    this.notifyWorkersIfAvailableWork();
   }
 
   private async onJobRequestMessage(

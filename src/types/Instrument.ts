@@ -22,6 +22,15 @@ export class Instrument extends NetworkClient {
     super("instrument_" + nanoid(), network);
 
     this.on(MessageType.JOB_AVAILABLE, this.handleJobAvailable.bind(this));
+
+    // announce that we are connected
+    this.send(
+      this.createMessage({
+        type: MessageType.INSTRUMENT_CONNECTED,
+        destination: "composer",
+        data: null,
+      })
+    );
   }
 
   private activeJobs = new Map<string, Worker>();

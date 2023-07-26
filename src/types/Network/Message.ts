@@ -42,6 +42,11 @@ export enum MessageType {
   JOB_COMPLETED = 103,
 
   /**
+   * The instrument is announcing that it is connected to the network.
+   */
+  INSTRUMENT_CONNECTED = 104,
+
+  /**
    * Query the jobs available on the composer.
    */
   QUERY_JOBS = 201,
@@ -78,4 +83,6 @@ export type MessageData = {
   [MessageType.JOB_RESPONSE]: Job | null;
 
   [MessageType.JOB_COMPLETED]: Job;
+
+  [MessageType.INSTRUMENT_CONNECTED]: null;
 };
