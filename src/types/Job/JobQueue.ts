@@ -9,7 +9,7 @@ export class JobQueue {
     return this.queue.length;
   }
 
-  public createJob(options: Job["options"]) {
+  public createJob(options: Job["options"], index?: number) {
     const job: Job = {
       id: nanoid(),
       status: "waiting",
@@ -21,12 +21,16 @@ export class JobQueue {
     return job;
   }
 
-  public async addJob(job: Job) {
+  public async addJob(job: Job, index?: number) {
     this.jobs[job.id] = {
       ...job,
       status: "waiting",
     };
-    this.queue.push(job.id);
+    if (index == undefined || index < 0) {
+      this.queue.push(job.id);
+    } else {
+      this.queue.splice(index, 0, job.id);
+    }
     return job;
   }
 

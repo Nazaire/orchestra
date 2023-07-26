@@ -29,26 +29,26 @@ On every machine that you want to do work on:
 
 On any machines that you need to allocate work from:
 
-- Create an instance of `Consumer`
+- Create an instance of `Client`
 
 ---
 
 For example, let's take a basic web app.
 
-- Server machine (only one): Has an instance of `Composer` and `Consumer`
+- Server machine (only one): Has an instance of `Composer` and `Client`
 - Worker machine (many): Has an instance of `Instrument`
 
-When a request comes in to the server, it can add a job to the network using the `Consumer` instance.
+When a request comes in to the server, it can add a job to the network using the `Client` instance.
 
 The `Composer` will then distribute the job to the `Instrument` on the worker machine.
 
 Alternatively, if you only need one machine:
 
-- Single machine: Has an instance of `Composer`, `Instrument` and `Consumer`
+- Single machine: Has an instance of `Composer`, `Instrument` and `Client`
 
 Or again, if you have multiple servers, you can have the `Composer` exist on a master worker machine:
 
-- Server (many): Has an instance of `Consumer`
+- Server (many): Has an instance of `Client`
 - Master worker (only one): Has an instance of `Composer` ( and `Instrument` if you want work to be done on the master worker too)
 - Slave worker (many): Has an instance of `Instrument`
 
@@ -68,9 +68,9 @@ const { MemNetwork } = require('orchestra');
 const network = new MemNetwork();
 
 // if you are using a network that requires an async connection
-// you need to also run network.connect() 
+// you need to also run network.connect()
 
-// network needs to be passed to all the major components (composer, instrument, consumer)
+// network needs to be passed to all the major components (composer, instrument, client)
 
 ```
 
@@ -86,7 +86,7 @@ const workspace = new Workspace(
     '/path/to/workspace', // this should be an absolute path, you can use __dirname to get the current directory, or process.cwd() to get the directory the process was started in
 );
 
-// the workspace needs to be passed to the consumer and instrument
+// the workspace needs to be passed to the client and instrument
 
 
 ```
@@ -147,23 +147,23 @@ worker.resolve(result);
 
 ```
 
-### Consumer
+### Client
 
-The consumer is an interface that can add work to the network.
+The Client is an interface that can add work to the network.
 
 ```
-const { Consumer } = require('orchestra');
+const { Client } = require('orchestra');
 
-const consumer = new Consumer(
+const orchestra = new Client(
     network,
     workspace,
 );
 
-const { job, result } = await consumer.addJob({ script: 'add.js', params: { a: 1, b: 2 } });
+console.log(`Creating job...`);
 
-console.log(`Created job`, { job });
-console.log('Waiting for completion...')
-console.log(`Result:`, await result)
+const result = await orchestra.play({ script: 'add.js', params: { a: 1, b: 2 } });
+
+console.log(`Job complete!`, { result });
 ```
 
 ## Typescript
@@ -186,16 +186,16 @@ const workspace = new Workspace<keyof MyScripts, MyScripts>(
     '/path/to/workspace',
 );
 
-const consumer = new Consumer<typeof Workspace>(
+const orchestra = new Client<typeof Workspace>(
     network,
     workspace,
 );
 
 // this method is now fully typed (the params and the result)
-const { job, result } = await consumer.addJob({
+const { job, result } = await orchestra.play({
     script: 'add.js',
     params: { a: 1, b: 2 } }
-) // { job: Job, result: Promise<number> }
+) // Promise<number>
 ```
 
 The Worker class can also be typed.
@@ -220,9 +220,11 @@ worker.resolve(result);
 
 # Examples
 
-## Basic Addition (Typescript) 
+## Basic Addition (Typescript)
+
 This example uses a worker to perform basic addition.
 The directory structure is as follows:
+
 ```
 - src/
     - server.ts
@@ -233,8 +235,9 @@ The directory structure is as follows:
 ```
 
 ### add.ts - the worker script
+
 This script will be invoked within a Node.JS worker process spawned by the `Instrument`.  
-Note that this is a `.ts` (typescript) file, but is referenced from the consumer at runtime as `add.js`.
+Note that this is a `.ts` (typescript) file, but is referenced from the client at runtime as `add.js`.
 
 ```
 // src/scripts/add.ts
@@ -250,12 +253,13 @@ worker.resolve(worker.params.a + worker.params.b);
 ```
 
 ### orchestra.ts - shared configuration
-This is a common file in your project shared between the worker and the server, it provides an instance of `Network`, `Workspace` and `Consumer`.
+
+This is a common file in your project shared between the worker and the server, it provides an instance of `Network`, `Workspace` and `Client`.
 
 ```
 // src/orchestra.ts
 
-import { Consumer, Network, Workspace } from "@nazaire/orchestra";
+import { Client, Network, Workspace } from "@nazaire/orchestra";
 import { Redis } from "ioredis";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -283,14 +287,18 @@ const workspacePath = join(__dirname, "./scripts");
 
 export const workspace = new Workspace<keyof Scripts, Scripts>(workspacePath);
 
-export const consumer = new Consumer(network, workspace);
+export const orchestra = new Client(network, workspace);
 ```
 
 ### server.ts - the server process
+
 This is the server process. In this example, it's simply setting up the `Composer` and adding a new job to the network every 2 seconds.
 
 ```
 // src/server.ts
+
+import { Composer } from "@nazaire/orchestra";
+import { orchestra } from 'src/orchestra.js';
 
 console.log(`Starting server...`);
 
@@ -304,17 +312,17 @@ new Composer(network, {
 console.log("Orchestra ready!");
 
 setInterval(() => {
-    const { job, result } = await consumer.addJob({
+    const job = await orchestra.queue({
         script: "add.js",
         params: { a: 1, b: 2},
     });
 
     console.log("Added job to queue", job);
-        
+
     try {
-        // result is a Promise that will resolve with the result once the job is complete
-        const value = await result;
-        
+        // result() returns a Promise that will resolve with the result once the job is complete
+        const value = await orchestra.result(job);
+
         console.log("Job succeeded", value);
     } catch (error) {
         console.error("Job failed", error);
@@ -324,6 +332,7 @@ setInterval(() => {
 ```
 
 ### worker.ts - the worker process
+
 This is the workers entry point. It sets up a `Instrument` that performs work as instructed from the `Composer`.
 
 ```

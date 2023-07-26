@@ -5,64 +5,58 @@ import { Network } from "./Network/Network.js";
 import { NetworkClient } from "./Network/NetworkClient.js";
 import { Workspace, WorkspaceResult, WorkspaceScript } from "./Workspace.js";
 
-export interface AddJobResult {
-  job: Job;
-  result: Promise<any>;
-}
-
-export interface StrictAddJobResult<
-  W extends Workspace<any, any>,
-  S extends WorkspaceScript<W>
-> {
-  job: Job;
-  result: Promise<WorkspaceResult<W, S>>;
-}
-
-export class Consumer<W extends Workspace<any, any>> extends NetworkClient {
+export class Client<W extends Workspace<any, any>> extends NetworkClient {
   constructor(network: Network, private readonly workspace: W) {
-    super("consumer_" + nanoid(), network);
+    super("client_" + nanoid(), network);
   }
 
   /**
-   * Public API with strict types
+   * Add a job to the composer's queue
    * @param options
    * @returns
    */
-  async addJob<S extends WorkspaceScript<W>>(
+  async queue<S extends WorkspaceScript<W>>(
     options: StrictJobOptions<W, S>
-  ): Promise<StrictAddJobResult<W, S>> {
-    const job = await this.createJob(options);
-    return {
-      job,
-      result: this.getJobResultPromise(job.id),
-    };
+  ): Promise<Job> {
+    return await this.createJob(options);
   }
 
-  async bulkAddJobs<S extends WorkspaceScript<W>>(
-    options: StrictJobOptions<W, S>[]
-  ): Promise<StrictAddJobResult<W, S>[]> {
-    const jobs = await Promise.all(options.map((o) => this.createJob(o)));
-    return jobs.map((job) => ({
-      job,
-      result: this.getJobResultPromise(job.id),
-    }));
-  }
-
-  async runJob<S extends WorkspaceScript<W>>(
+  /**
+   * Add a job and bypass the queue, returns the result once the job is complete
+   * @param options
+   * @returns the result of the job
+   */
+  async play<S extends WorkspaceScript<W>>(
     options: StrictJobOptions<W, S>
   ): Promise<WorkspaceResult<W, S>> {
-    let job = await this.createJob(options);
+    const job = await this.createJob(options, 0);
     return this.getJobResultPromise(job.id);
   }
 
-  async runJobs<S extends WorkspaceScript<W>>(
-    options: StrictJobOptions<W, S>[]
-  ): Promise<WorkspaceResult<W, S>[]> {
-    const jobs = await Promise.all(options.map((o) => this.createJob(o)));
-    return Promise.all(jobs.map((job) => this.getJobResultPromise(job.id)));
+  /**
+   * Return a promise that resolves with the job when it is complete
+   * @param jobId
+   * @returns
+   */
+  async completion(jobId: string): Promise<Job> {
+    return this.getJobCompletedPromise(jobId);
   }
 
-  async getJob(id: string): Promise<Job[]> {
+  /**
+   * Return a promise that resolves with the result when the job is complete
+   */
+  async result<S extends WorkspaceScript<W>>(
+    jobId: string
+  ): Promise<WorkspaceResult<W, S>> {
+    return this.getJobResultPromise(jobId);
+  }
+
+  /**
+   * Retrieve the current state of a job
+   * @param id
+   * @returns
+   */
+  async getJob(id: string): Promise<Job | null> {
     const message = this.createMessage({
       type: MessageType.QUERY_JOBS,
       destination: "*",
@@ -75,14 +69,14 @@ export class Consumer<W extends Workspace<any, any>> extends NetworkClient {
         1000
       );
 
-    return response.data;
+    return response.data[0];
   }
 
-  private async createJob(options: JobOptions) {
+  private async createJob(options: JobOptions, index: number = -1) {
     const message = this.createMessage({
       type: MessageType.CREATE_JOB,
       destination: "composer",
-      data: options,
+      data: { options, index },
     });
     const response =
       await this.sendAndAwaitResponse<MessageType.CREATE_JOB_RESPONSE>(

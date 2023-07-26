@@ -49,11 +49,11 @@ export class Composer extends NetworkClient {
   }
 
   private async onCreateJobMessage(msg: StrictMessage<MessageType.CREATE_JOB>) {
-    const job = this.queue.createJob(msg.data);
+    const job = this.queue.createJob(msg.data.options, msg.data.index);
 
     if (this.options?.debug) {
       console.log(
-        `Composer: Created job ${job.id}. Waiting jobs: ${this.queue.size}`
+        `Composer: Created job ${job.id} at index ${msg.data}. Waiting jobs: ${this.queue.size}`
       );
     }
 

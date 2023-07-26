@@ -1,4 +1,4 @@
-export { Consumer } from "./types/Consumer.js";
+export { Client } from "./types/Client.js";
 export type { Job } from "./types/Job/Job.js";
 export { Composer } from "./types/Composer.js";
 export * as Network from "./types/Network/index.js";
