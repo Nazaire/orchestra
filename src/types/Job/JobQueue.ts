@@ -29,7 +29,7 @@ export class JobQueue {
     };
     this.queue.push(job.id);
     this.queue.sort((a, b) => {
-      return this.jobs[a].priority - this.jobs[b].priority;
+      return this.jobs[b].priority - this.jobs[a].priority;
     });
     return job;
   }
