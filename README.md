@@ -8,8 +8,6 @@
 A framework for distributing work over many machines, integrated with Node.js workers to utilise many threads per machine.
 
 ```
-import { Client } from 'orchestra';
-
 const orchestra = new Client(
     network,
     workspace,
