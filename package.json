@@ -21,7 +21,7 @@
   },
   "name": "@nazaire/orchestra",
   "description": "A framework for distributing work over many machines, integrated with Node.js workers to utilise many threads per machine.",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.16",
   "publishConfig": {
     "access": "public"
   },
