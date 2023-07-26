@@ -29,7 +29,7 @@ export class Client<W extends Workspace<any, any>> extends NetworkClient {
   async play<S extends WorkspaceScript<W>>(
     options: StrictJobOptions<W, S>
   ): Promise<WorkspaceResult<W, S>> {
-    const job = await this.createJob(options, 0);
+    const job = await this.createJob(options, 1);
     return this.getJobResultPromise(job.id);
   }
 
@@ -72,11 +72,14 @@ export class Client<W extends Workspace<any, any>> extends NetworkClient {
     return response.data[0];
   }
 
-  private async createJob(options: JobOptions, index: number = -1) {
+  private async createJob(
+    options: Job["options"],
+    priority: Job["priority"] = 0
+  ) {
     const message = this.createMessage({
       type: MessageType.CREATE_JOB,
       destination: "composer",
-      data: { options, index },
+      data: { options, priority },
     });
     const response =
       await this.sendAndAwaitResponse<MessageType.CREATE_JOB_RESPONSE>(

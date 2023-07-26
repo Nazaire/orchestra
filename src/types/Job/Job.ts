@@ -9,6 +9,8 @@ export interface Job {
 
   options: JobOptions;
 
+  priority: 0 | 1;
+
   // passed when the job is complete
   result: any | null | undefined;
 

@@ -9,11 +9,12 @@ export class JobQueue {
     return this.queue.length;
   }
 
-  public createJob(options: Job["options"], index?: number) {
+  public createJob(options: Job["options"], priority: Job["priority"]) {
     const job: Job = {
       id: nanoid(),
       status: "waiting",
       options,
+      priority,
       result: null,
       error: null,
     };
@@ -21,17 +22,24 @@ export class JobQueue {
     return job;
   }
 
-  public async addJob(job: Job, index?: number) {
+  public async addJob(job: Job) {
     this.jobs[job.id] = {
       ...job,
       status: "waiting",
     };
-    if (index == undefined || index < 0) {
-      this.queue.push(job.id);
-    } else {
-      this.queue.splice(index, 0, job.id);
-    }
+    this.queue.push(job.id);
+    this.queue.sort((a, b) => {
+      return this.jobs[a].priority - this.jobs[b].priority;
+    });
     return job;
+  }
+
+  public indexOf(id: string) {
+    return this.queue.findIndex((j) => j === id);
+  }
+
+  public getValues() {
+    return this.queue.map((id) => this.jobs[id]);
   }
 
   /**
@@ -39,7 +47,10 @@ export class JobQueue {
    * @returns The next job in the queue, or null if there are no jobs.
    */
   public next() {
-    return this.queue[0];
+    const queue = this.queue.sort((a, b) => {
+      return this.jobs[a].priority - this.jobs[b].priority;
+    });
+    return queue[0];
   }
 
   public updateJob(id: string, data: Partial<Job>) {

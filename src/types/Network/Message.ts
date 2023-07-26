@@ -68,7 +68,10 @@ export enum MessageType {
 }
 
 export type MessageData = {
-  [MessageType.CREATE_JOB]: { options: JobOptions; index: number };
+  [MessageType.CREATE_JOB]: {
+    options: Job["options"];
+    priority: Job["priority"];
+  };
   [MessageType.CREATE_JOB_RESPONSE]: Job;
 
   [MessageType.QUERY_JOBS]: {
