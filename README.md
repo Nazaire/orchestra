@@ -33,6 +33,21 @@ console.log(`Job ${job.id} added to queue`);
 const result = await orchestra.result(job.id);
 
 console.log(`Job complete!`, { result });
+
+
+// Or, if you need to pass data during execution of the script, you can use orchestra.stream()
+
+console.log(`Creating job...`)
+const job = await orchestra.queue({ script: 'add.js', params: { a: 1, b: 2 });
+const stream = await orchestra.stream(job.id);
+
+stream.on('data', (chunk) => {
+    console.log(`Received data from job ${job.id}`, chunk);
+});
+
+stream.on('end', () => {
+    console.log(`Job ${job.id} complete!`);
+});
 ```
 
 ## Installation
@@ -167,6 +182,11 @@ const worker = new Worker();
 const params = worker.params;
 
 console.log(`Doing work...`, { params });
+
+
+// (optional) the worker can also emit data during execution
+worker.write({ message: `Doing addition: ${params.a} + ${params.b}` })
+// a Client can use orchestra.stream(job.id) to receive this data
 
 const result = params.a + params.b;
 
