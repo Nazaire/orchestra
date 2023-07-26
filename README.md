@@ -170,7 +170,7 @@ console.log(`Doing work...`, { params });
 
 const result = params.a + params.b;
 
-worker.resolve(result);
+worker.return(result);
 
 ```
 
@@ -242,7 +242,7 @@ const params = worker.params; // { a: number, b: number }
 const result = params.a + params.b;
 
 // this method is now fully typed and expects a number
-worker.resolve(result);
+worker.return(result);
 ```
 
 # Examples
@@ -273,10 +273,10 @@ import { Worker } from '@nazaire/orchestra';
 import { workspace } from 'src/orchestra.ts';
 
 // we pass the workspace type as a generic param to the Worker class
-// this will ensure worker.params and worker.resolve are correctly typed
+// this will ensure worker.params and worker.return are correctly typed
 const worker = new Worker<typeof workspace, 'add.js'>();
 
-worker.resolve(worker.params.a + worker.params.b);
+worker.return(worker.params.a + worker.params.b);
 
 ```
 
