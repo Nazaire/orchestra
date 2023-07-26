@@ -17,10 +17,8 @@ const orchestra = new Client(
 
 console.log(`Creating job...`);
 
-
 // Instruct the network to execute add.js and return the result
 const result = await orchestra.play({ script: 'add.js', params: { a: 1, b: 2 } });
-
 
 console.log(`Job complete!`, { result });
 ```
