@@ -13,15 +13,6 @@ const orchestra = new Client(
     workspace,
 );
 
-console.log(`Creating job...`);
-
-// Instruct the network to execute add.js on the next available worker and return the result
-const result = await orchestra.play({ script: 'add.js', params: { a: 1, b: 2 } });
-
-console.log(`Job complete!`, { result });
-
-// Or, If you don't need something processed immediately, you can queue a job instead
-
 console.log(`Creating job...`)
 
 // Add a job to the network and respect the queue
@@ -33,12 +24,30 @@ console.log(`Job ${job.id} added to queue`);
 const result = await orchestra.result(job.id);
 
 console.log(`Job complete!`, { result });
+```
+
+Or if you need something to be processed immediately you can bypass the job queue using the play() method
+```
+const orchestra = new Client(
+    network,
+    workspace,
+);
+
+console.log(`Creating job...`);
+
+// Instruct the network to execute add.js on the next available worker and return the result
+const result = await orchestra.play({ script: 'add.js', params: { a: 1, b: 2 } });
+
+console.log(`Job complete!`, { result });
+```
 
 
-// Or, if you need to pass data during execution of the script, you can use orchestra.stream()
-
+If you need to pass data during execution of the script, you can use orchestra.stream()
+```
 console.log(`Creating job...`)
 const job = await orchestra.queue({ script: 'add.js', params: { a: 1, b: 2 });
+
+// create a stream to receive data from the Worker's write() method (see below)
 const stream = await orchestra.stream(job.id);
 
 stream.on('data', (chunk) => {
